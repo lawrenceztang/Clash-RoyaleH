@@ -30,6 +30,8 @@ public class MatchPlay implements Runnable {
 	final static int arenaBottomy = 756;
 	static volatile BufferedImage image;
 	final static int DISTANCE_BETWEEN_SLOTS = 100;
+	static double ratioX = 1;
+	static double ratioY = 1;
 
 	static int towersBroken;
 
@@ -70,10 +72,10 @@ public class MatchPlay implements Runnable {
 				maxPoint = enemies.get(i);
 			}
 		}
-		
+
 		if (maxEnemies > 4) {
 			for (int q = 0; q < 4; q++) {
-				int color = image.getRGB(890 + q * DISTANCE_BETWEEN_SLOTS, 928);
+				int color = image.getRGB((int) ((890 + q * DISTANCE_BETWEEN_SLOTS) * ratioX), (int) (928 * ratioY));
 				int blue = color & 0xff;
 				int green = (color & 0xff00) >> 8;
 				int red = (color & 0xff0000) >> 16;
@@ -81,7 +83,7 @@ public class MatchPlay implements Runnable {
 				if (red < 150 && green < 200 && blue > 250) {
 					selectCard(q);
 					TimeUnit.SECONDS.sleep(1);
-					click((int) maxPoint.getX(), (int) maxPoint.getY() + 30);
+					click((int) (maxPoint.getX() / ratioX), (int) ((maxPoint.getY() + 30) / ratioY));
 					TimeUnit.SECONDS.sleep(1);
 				}
 			}
@@ -92,7 +94,7 @@ public class MatchPlay implements Runnable {
 		click(1080, 940);
 		TimeUnit.SECONDS.sleep(2);
 
-		int color = image.getRGB(815, 873);
+		int color = image.getRGB((int) (815 * ratioX), (int) (873 * ratioY));
 		int blue = color & 0xff;
 		int green = (color & 0xff00) >> 8;
 		int red = (color & 0xff0000) >> 16;
@@ -111,7 +113,7 @@ public class MatchPlay implements Runnable {
 		TimeUnit.SECONDS.sleep(3);
 		for (int x = arenaTopx; x < arenaBottomx; x++) {
 			for (int y = arenaTopy; y < arenaBottomy; y++) {
-				int colorz = image.getRGB(x, y);
+				int colorz = image.getRGB((int) (x * ratioX), (int) (y * ratioY));
 				int bluez = colorz & 0xff;
 				int greenz = (colorz & 0xff00) >> 8;
 				int redz = (colorz & 0xff0000) >> 16;
@@ -137,7 +139,7 @@ public class MatchPlay implements Runnable {
 
 			Point nearestEnemy = new Point(0, 0);
 			ArrayList<Point> enemies = detectEnemies();
-			//playArrows(enemies);
+			// playArrows(enemies);
 			for (int i = 0; i < enemies.size(); i++) {
 				if (enemies.get(i).getY() > nearestEnemy.x) {
 					nearestEnemy.y = (int) enemies.get(i).getY();
@@ -148,7 +150,7 @@ public class MatchPlay implements Runnable {
 			int arrowSlot = 5;
 
 			for (int q = 0; q < 4; q++) {
-				int color = image.getRGB(890 + q * DISTANCE_BETWEEN_SLOTS, 928);
+				int color = image.getRGB((int) ((890 + q * DISTANCE_BETWEEN_SLOTS) * ratioX), (int) (928 * ratioY));
 				int blue = color & 0xff;
 				int green = (color & 0xff00) >> 8;
 				int red = (color & 0xff0000) >> 16;
@@ -172,7 +174,7 @@ public class MatchPlay implements Runnable {
 						+ (arenaBottomy + arenaTopy) / 2));
 			}
 
-			int colorz = image.getRGB(1166, 973);
+			int colorz = image.getRGB((int) (1166 * ratioX), (int) (973 * ratioY));
 			int bluez = colorz & 0xff;
 			int greenz = (colorz & 0xff00) >> 8;
 			int redz = (colorz & 0xff0000) >> 16;
@@ -186,7 +188,7 @@ public class MatchPlay implements Runnable {
 			}
 			TimeUnit.MILLISECONDS.sleep(500);
 
-			int color = image.getRGB(947, 880);
+			int color = image.getRGB((int) (947 * ratioX), (int) (880 * ratioY));
 			int blue = color & 0xff;
 			int green = (color & 0xff00) >> 8;
 			int red = (color & 0xff0000) >> 16;
@@ -197,12 +199,12 @@ public class MatchPlay implements Runnable {
 				return;
 			}
 
-			int color2 = image.getRGB(802, 608);
+			int color2 = image.getRGB((int) (802 * ratioX), (int) (608 * ratioY));
 			int blue2 = color2 & 0xff;
 			int green2 = (color & 0xff00) >> 8;
 			int red2 = (color & 0xff0000) >> 16;
 
-			color = image.getRGB(1119, 607);
+			color = image.getRGB((int) (1119 * ratioX), (int) (607 * ratioY));
 			blue = color & 0xff;
 			green = (color & 0xff00) >> 8;
 			red = (color & 0xff0000) >> 16;
@@ -229,13 +231,13 @@ public class MatchPlay implements Runnable {
 
 		for (int x = arenaTopx; x < arenaBottomx; x++) {
 			for (int y = arenaTopy; y < arenaBottomy; y++) {
-				int color = image.getRGB(x, y);
+				int color = image.getRGB((int) (x * ratioX), (int) (y * ratioY));
 				int blue = color & 0xff;
 				int green = (color & 0xff00) >> 8;
 				int red = (color & 0xff0000) >> 16;
 
 				if (red > 210 && blue == green && green < 60) {
-					int colorz = image.getRGB(x - 4, y);
+					int colorz = image.getRGB((int) ((x - 4) * ratioX), (int) (y * ratioY));
 					int bluez = colorz & 0xff;
 					int greenz = (colorz & 0xff00) >> 8;
 					int redz = (colorz & 0xff0000) >> 16;
@@ -259,7 +261,7 @@ public class MatchPlay implements Runnable {
 	public void run() {
 		while (true) {
 			image = robot.createScreenCapture(new Rectangle(0, 0, width, height));
-			int color = image.getRGB(1315, 600);
+			int color = image.getRGB((int) (1315 * ratioX), (int) (600 * ratioY));
 			int blue = color & 0xff;
 			int green = (color & 0xff00) >> 8;
 			int red = (color & 0xff0000) >> 16;
@@ -289,7 +291,7 @@ public class MatchPlay implements Runnable {
 
 	public static int getCard(int slotNum) {
 
-		int color = image.getRGB(width / 2 + 100 * slotNum, height - height / 10);
+		int color = image.getRGB((int) ((width / 2 + 100 * slotNum) * ratioX), (int) ((height - height / 10) * ratioY));
 		int blue = color & 0xff;
 		int green = (color & 0xff00) >> 8;
 		int red = (color & 0xff0000) >> 16;
@@ -338,15 +340,15 @@ public class MatchPlay implements Runnable {
 	public static void swipe(int direction) throws InterruptedException {
 		switch (direction) {
 		case -1:
-			robot.mouseMove(730, 460);
+			robot.mouseMove((int) (730 * ratioX), (int) (460 * ratioY));
 			robot.mousePress(InputEvent.BUTTON1_MASK);
-			robot.mouseMove(1190, 460);
+			robot.mouseMove((int) (1190 * ratioX), (int) (460 * ratioY));
 			break;
 
 		case 1:
-			robot.mouseMove(1190, 460);
+			robot.mouseMove((int) (1190 * ratioX), (int) (60 * ratioY));
 			robot.mousePress(InputEvent.BUTTON1_MASK);
-			robot.mouseMove(730, 460);
+			robot.mouseMove((int) (730 * ratioX), (int) (460 * ratioY));
 			break;
 		}
 		TimeUnit.MILLISECONDS.sleep(100);
@@ -354,7 +356,7 @@ public class MatchPlay implements Runnable {
 	}
 
 	public static void dailyQuest() throws InterruptedException {
-		int color = image.getRGB(916, 238);
+		int color = image.getRGB((int) (916 * ratioX), (int) (238 * ratioY));
 		int blue = color & 0xff;
 		int green = (color & 0xff00) >> 8;
 		int red = (color & 0xff0000) >> 16;
@@ -364,7 +366,7 @@ public class MatchPlay implements Runnable {
 			TimeUnit.SECONDS.sleep(1);
 			for (int x = 0; x < 3; x++) {
 				for (int y = 238; y < 890; y++) {
-					color = image.getRGB(795 + x * 130, y);
+					color = image.getRGB((int) ((795 + x * 130) * ratioX), (int) (y * ratioY));
 					blue = color & 0xff;
 					green = (color & 0xff00) >> 8;
 					red = (color & 0xff0000) >> 16;
@@ -388,7 +390,7 @@ public class MatchPlay implements Runnable {
 		boolean openChest = true;
 		for (int x = 701; x < 1200; x++) {
 			for (int y = 737; y < 890; y++) {
-				int color = image.getRGB(x, y);
+				int color = image.getRGB((int) (x * ratioX), (int) ( y * ratioY));
 				int blue = color & 0xff;
 				int green = (color & 0xff00) >> 8;
 				int red = (color & 0xff0000) >> 16;
@@ -411,7 +413,7 @@ public class MatchPlay implements Runnable {
 			click(950, 650);
 		}
 
-		int color = image.getRGB(1024, 223);
+		int color = image.getRGB((int) (1024 * ratioX), (int) (223 * ratioY));
 		int blue = color & 0xff;
 		int green = (color & 0xff00) >> 8;
 		int red = (color & 0xff0000) >> 16;
@@ -426,7 +428,7 @@ public class MatchPlay implements Runnable {
 	}
 
 	public static void click(int x, int y) throws InterruptedException {
-		robot.mouseMove(x, y);
+		robot.mouseMove((int) (x * ratioX), (int) (y * ratioY));
 		robot.mousePress(InputEvent.BUTTON1_MASK);
 		TimeUnit.MILLISECONDS.sleep(100);
 		robot.mouseRelease(InputEvent.BUTTON1_MASK);
