@@ -29,8 +29,9 @@ public class MatchPlay implements Runnable {
 	final static int arenaBottomx = 1174;
 	final static int arenaBottomy = 756;
 	static volatile BufferedImage image;
-	
-	int towersBroken;
+	final static int DISTANCE_BETWEEN_SLOTS = 100;
+
+	static int towersBroken;
 
 	public static void main(String[] args) throws AWTException, InterruptedException {
 		initialize();
@@ -50,6 +51,41 @@ public class MatchPlay implements Runnable {
 
 		}
 
+	}
+
+	public static void playArrows(ArrayList<Point> enemies) throws InterruptedException {
+		int maxEnemies = 0;
+		Point maxPoint = new Point(0, 0);
+		for (int i = 0; i < enemies.size(); i++) {
+			int enemiesIn = 0;
+			for (int k = 0; k < enemies.size(); k++) {
+				if (Math.pow(enemies.get(k).getX() - enemies.get(i).getX(), 2)
+						+ Math.pow(enemies.get(k).getY() - enemies.get(i).getY(), 2) < 16) {
+					enemiesIn++;
+
+				}
+			}
+			if (enemiesIn > maxEnemies) {
+				maxEnemies = enemiesIn;
+				maxPoint = enemies.get(i);
+			}
+		}
+		
+		if (maxEnemies > 4) {
+			for (int q = 0; q < 4; q++) {
+				int color = image.getRGB(890 + q * DISTANCE_BETWEEN_SLOTS, 928);
+				int blue = color & 0xff;
+				int green = (color & 0xff00) >> 8;
+				int red = (color & 0xff0000) >> 16;
+
+				if (red < 150 && green < 200 && blue > 250) {
+					selectCard(q);
+					TimeUnit.SECONDS.sleep(1);
+					click((int) maxPoint.getX(), (int) maxPoint.getY() + 30);
+					TimeUnit.SECONDS.sleep(1);
+				}
+			}
+		}
 	}
 
 	public static void requestCards() throws InterruptedException {
@@ -95,25 +131,48 @@ public class MatchPlay implements Runnable {
 
 	public static void playMatch() throws InterruptedException {
 		click(897, 640);
-		TimeUnit.SECONDS.sleep(7);
+		TimeUnit.SECONDS.sleep(5);
 
 		while (true) {
 
 			Point nearestEnemy = new Point(0, 0);
 			ArrayList<Point> enemies = detectEnemies();
+			//playArrows(enemies);
 			for (int i = 0; i < enemies.size(); i++) {
 				if (enemies.get(i).getY() > nearestEnemy.x) {
 					nearestEnemy.y = (int) enemies.get(i).getY();
 					nearestEnemy.x = (int) enemies.get(i).getX();
 				}
 			}
+
+			int arrowSlot = 5;
+
+			for (int q = 0; q < 4; q++) {
+				int color = image.getRGB(890 + q * DISTANCE_BETWEEN_SLOTS, 928);
+				int blue = color & 0xff;
+				int green = (color & 0xff00) >> 8;
+				int red = (color & 0xff0000) >> 16;
+
+				if (red < 150 && green < 200 && blue > 250) {
+					arrowSlot = q;
+				}
+			}
+
 			if (nearestEnemy.y != 0) {
-				selectCard(random.nextInt(4));
+				int selected = random.nextInt(4);
+				while (true) {
+					if (selected == arrowSlot) {
+						selected = random.nextInt(4);
+					} else {
+						break;
+					}
+				}
+				selectCard(selected);
 				click((int) nearestEnemy.getX(), (int) (limitY(arenaBottomy + arenaTopy) / 2 - nearestEnemy.getY() + 100
 						+ (arenaBottomy + arenaTopy) / 2));
 			}
 
-			int colorz = image.getRGB(1187, 973);
+			int colorz = image.getRGB(1166, 973);
 			int bluez = colorz & 0xff;
 			int greenz = (colorz & 0xff00) >> 8;
 			int redz = (colorz & 0xff0000) >> 16;
@@ -122,10 +181,10 @@ public class MatchPlay implements Runnable {
 				click(950, 736);
 			}
 			TimeUnit.MILLISECONDS.sleep(50);
-			if(random.nextInt(6) == 1) {
-			emote(random.nextInt(9));
+			if (random.nextInt(6) == 1) {
+				emote(random.nextInt(9));
 			}
-			TimeUnit.MILLISECONDS.sleep(500);;
+			TimeUnit.MILLISECONDS.sleep(500);
 
 			int color = image.getRGB(947, 880);
 			int blue = color & 0xff;
@@ -137,8 +196,32 @@ public class MatchPlay implements Runnable {
 				TimeUnit.SECONDS.sleep(1);
 				return;
 			}
-		}
 
+			int color2 = image.getRGB(802, 608);
+			int blue2 = color2 & 0xff;
+			int green2 = (color & 0xff00) >> 8;
+			int red2 = (color & 0xff0000) >> 16;
+
+			color = image.getRGB(1119, 607);
+			blue = color & 0xff;
+			green = (color & 0xff00) >> 8;
+			red = (color & 0xff0000) >> 16;
+			if (!(blue > 200)) {
+				if (!(blue2 > 200)) {
+					towersBroken = 2;
+				} else {
+					towersBroken = 1;
+				}
+
+			} else {
+				if (blue2 > 200) {
+					towersBroken = 0;
+				} else {
+					towersBroken = -1;
+				}
+			}
+
+		}
 	}
 
 	public static ArrayList<Point> detectEnemies() {
@@ -279,18 +362,20 @@ public class MatchPlay implements Runnable {
 		if (red > blue) {
 			click(916, 238);
 			TimeUnit.SECONDS.sleep(1);
-			for (int y = 238; y < 890; y++) {
-				color = image.getRGB(950, y);
-				blue = color & 0xff;
-				green = (color & 0xff00) >> 8;
-				red = (color & 0xff0000) >> 16;
-				if (blue < 100 && green < 220 && red == 255) {
-					for (int i = 0; i < 10; i++) {
-						click(950, y);
-						TimeUnit.SECONDS.sleep(1);
+			for (int x = 0; x < 3; x++) {
+				for (int y = 238; y < 890; y++) {
+					color = image.getRGB(795 + x * 130, y);
+					blue = color & 0xff;
+					green = (color & 0xff00) >> 8;
+					red = (color & 0xff0000) >> 16;
+					if (blue < 100 && green < 220 && red == 255) {
+						for (int i = 0; i < 10; i++) {
+							click(795 + x * 130, y);
+							TimeUnit.SECONDS.sleep(1);
+						}
+						click(1194, 148);
+						return;
 					}
-					click(1194, 148);
-					return;
 				}
 			}
 			click(1194, 148);
